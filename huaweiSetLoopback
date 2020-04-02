@@ -1,0 +1,48 @@
+#!/usr/bin/expect -f
+#this script is designed to execute a command and handle if any ---MORE--- until the end
+set timeout 300
+set ip [lindex $argv 0]
+#set comm [lindex $argv 1]
+spawn ssh -o StrictHostKeyChecking=no admin@$ip
+#expect "*login:"
+#send "admin\r"
+expect "*assword: "
+send "53cretPa55Word\r"
+expect ">"
+send "system-view\r"
+expect "\]"
+send "interface range GigabitEthernet 0/0/1 to GigabitEthernet 0/0/28\r"
+
+expect {
+    "Error: Wrong parameter found at '^' position.\r
+*\]" {
+        send "interface range GigabitEthernet 0/0/1 to GigabitEthernet 0/0/12\r"
+        expect "\]"
+        send "loopback-detect action trap\r"
+        expect "\]"
+        send "loopback-detect enable\r"
+        expect "\]"
+        send "return\r"
+        expect ">"
+        send "save\r"
+        expect "\[Y/N\]"
+        send "y\r"
+        expect ">"
+        send "quit\r"
+        expect eof
+    }
+    -ex "\]" {
+        send "loopback-detect action trap\r"
+        expect "\]"
+        send "loopback-detect enable\r"
+        expect "\]"
+        send "return\r"
+        expect ">"
+        send "save\r"
+        expect "\[Y/N\]"
+        send "y\r"
+        expect ">"
+        send "quit\r"
+        expect eof
+    }
+}
